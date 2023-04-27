@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  # MySQL
+  db:
+    container_name: mysql8
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: fcode@2019
+      # MYSQL_DATABASE: sandbox
+      MYSQL_USER: sandbox_user
+      MYSQL_PASSWORD: passpass
+    command:
+      - mysqld
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+      - --sql_mode=ERROR_FOR_DIVISION_BY_ZERO,IGNORE_SPACE,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE,PIPES_AS_CONCAT,REAL_AS_FLOAT,STRICT_ALL_TABLES,STRICT_TRANS_TABLES
+    ports:
+      - '3306:3306'
+    volumes:
+      - './docker/db/data:/var/lib/mysql'
+      # - './docker/db/my.cnf:/etc/mysql/conf.d/my.cnf'
+      # - './docker/db/sql:/docker-entrypoint-initdb.d'
+    restart: always
+
+  # adminer
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      MEMORY: -1
+      UPLOAD: -1
+    volumes:
+       - ./docker/adminer/uploads.ini:/usr/local/etc/php/conf.d/upload_large_dumps.ini
+
+  # redis
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - ./docker/redis/data:/data
+    restart: always
+
+  # rabbitmq
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./docker/rabbitmq/data:/var/lib/rabbitmq
+    restart: always
+
+# phpmyadmin
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: fcode@2019
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 10000M
