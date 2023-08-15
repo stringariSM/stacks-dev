@@ -1,4 +1,5 @@
 *.dblwr
 *.rdb
+*.crt
 
 data/
